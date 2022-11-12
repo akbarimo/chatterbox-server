@@ -28,9 +28,9 @@ var Messages = {
   _conform: function(message) {
     // ensure each message object conforms to expected shape
     message.text = message.text || '';
-    message.username = message.username || '';
-    message.roomname = message.roomname || '';
+    message.username = message.username || 'anonymous';
+    message.roomname = message.roomname || 'lobby';
     return message;
   }
-  
+
 };

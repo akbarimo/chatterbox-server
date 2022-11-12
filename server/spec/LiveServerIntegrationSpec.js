@@ -65,5 +65,42 @@ describe('server', function() {
     });
   });
 
+  it('should respond with 202 for messages that have been deleted', function(done) {
+    var requestParams = {method: 'DELETE',
+      uri: 'http://127.0.0.1:3000/classes/messages'
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(202);
+      done();
+    });
+  });
+
+  it('should respond with 203 for messages that have been deleted', function(done) {
+    var requestParams = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000'
+    };
+
+    request(requestParams, function(error, response, defaultHeader) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(203);
+      var method = JSON.parse(defaultHeader);
+      expect(method).to.equal('GET, POST, PUT, DELETE, OPTIONS');
+      done();
+    });
+  });
+
+  it('should respond with 202 for using PUT method', function(done) {
+    var requestParams = {method: 'PUT',
+      uri: 'http://127.0.0.1:3000/classes/messages'
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      expect(response.statusCode).to.equal(202);
+      done();
+    });
+  });
 
 });

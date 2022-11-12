@@ -12,6 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var serverResponse = [];
+var idx = 0;
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -19,7 +20,6 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept, authorization',
   'access-control-max-age': 10 // Seconds.
 };
-
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -40,19 +40,43 @@ var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
-  var statusCode = 200;
+  let statusCode = 200;
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  let headers = defaultCorsHeaders;
+
+  if (request.method === 'DELETE') {
+    statusCode = 202;
+    // statusCode = 204; Resource deleted successfully
+
+  }
+
+  if (request.method === 'PUT') {
+    statusCode = 202;
+    // statusCode = 204; Resource updated successfully
+    // statusCode = 201; Resource created
+
+  }
+
+  if (request.method === 'OPTIONS') {
+    statusCode = 203;
+    headers['Content-Type'] = 'application/json';
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(defaultCorsHeaders['access-control-allow-methods']));
+    return;
+  }
+
 
   if (request.method === 'POST') {
-    var postData = '';
+    let postData = '';
     request.on('data', (chunk) => {
       postData += chunk;
     }).on('end', () => {
       postData = JSON.parse(postData);
       postData.url = request.url;
+      postData['message_id'] = idx++;
       serverResponse.push(postData);
+      response.end(JSON.stringify(serverResponse));
     });
     statusCode = 201;
   }
@@ -73,12 +97,11 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'JSON';
+  headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
-
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows

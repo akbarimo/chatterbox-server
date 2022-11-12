@@ -91,4 +91,48 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should respond with code 202 for messages that have been deleted', function() {
+    var stubMsg = {
+      username: 'Chris',
+      text: 'Give me diamonds!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'DELETE');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(202);
+  });
+
+  it('Should 203 when asked for a options method', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    var methods = JSON.parse(res._data);
+    expect(methods.length).to.be.above(0);
+    expect(methods).to.equal('GET, POST, PUT, DELETE, OPTIONS');
+    expect(res._responseCode).to.equal(203);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should 202 when using PUT method', function() {
+    var req = new stubs.request('/classes/messages', 'PUT');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(202);
+    expect(res._ended).to.equal(true);
+  });
+
 });
