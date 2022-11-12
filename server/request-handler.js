@@ -12,7 +12,6 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 var serverResponse = [];
-var filePaths = [];
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
@@ -37,8 +36,7 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  // console.log('Request Object', request);
-  // console.log('Response Object', response);
+
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
   // The outgoing status.
@@ -48,7 +46,6 @@ var requestHandler = function(request, response) {
   var headers = defaultCorsHeaders;
 
   if (request.method === 'POST') {
-    filePaths.push(request.url);
     var postData = '';
     request.on('data', (chunk) => {
       postData += chunk;
@@ -62,12 +59,13 @@ var requestHandler = function(request, response) {
 
   if (request.method === 'GET') {
     statusCode = 200;
-    filePaths.push(request.url);
-    // if (!filePaths.includes(request.url)) {
-    //   statusCode = 404;
-    // }
-    if (request.url !== '/classes/messages') {
-      statusCode = 404;
+
+    for (let i = 0; i < serverResponse.length; i++) {
+      let cur = serverResponse[i];
+      if (cur.url !== request.url) {
+        statusCode = 404;
+        break;
+      }
     }
   }
 
